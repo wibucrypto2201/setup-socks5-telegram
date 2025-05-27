@@ -12,13 +12,14 @@ echo "Enter password for user $USERNAME:"
 read -rs PASSWORD
 
 PORT=1080
-INTERFACE="eth0"
+INTERFACE=$(ip route get 1.1.1.1 | awk '{print $5; exit}')
+LOGFILE="/tmp/danted.log"
 
 # Remove old installation
 echo "[+] Removing old Dante setup (if any)"
 sudo systemctl stop danted || true
 sudo apt purge --autoremove dante-server -y || true
-sudo rm -f /etc/danted.conf /var/log/danted.log || true
+sudo rm -f /etc/danted.conf "$LOGFILE" || true
 
 # Reinstall Dante
 echo "[+] Installing dante-server"
@@ -35,7 +36,7 @@ echo "$USERNAME:$PASSWORD" | sudo chpasswd --crypt-method=SHA512
 # Generate Dante config
 echo "[+] Writing /etc/danted.conf"
 cat <<EOF | sudo tee /etc/danted.conf > /dev/null
-logoutput: /var/log/danted.log
+logoutput: $LOGFILE
 internal: $INTERFACE port = $PORT
 external: $INTERFACE
 
