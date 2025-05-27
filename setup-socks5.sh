@@ -29,7 +29,8 @@ sudo apt install dante-server -y
 echo "[+] Creating user: $USERNAME"
 sudo deluser --remove-home $USERNAME || true
 sudo adduser --disabled-login --gecos "" $USERNAME
-echo "$USERNAME:$PASSWORD" | sudo chpasswd
+# If password too weak, bypass policy
+echo "$USERNAME:$PASSWORD" | sudo chpasswd --crypt-method=SHA512
 
 # Generate Dante config
 echo "[+] Writing /etc/danted.conf"
